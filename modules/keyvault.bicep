@@ -10,19 +10,21 @@ param tags object
 @description('Tenant id voor de Key Vault')
 param tenantId string
 
-@description('Required. Resource ID of the virtual network for private endpoints.')
-param virtualNetworkId string
-
 @description('Required. Resource ID of the subnet for private endpoints.')
 param subnetId string
 
-@description('De naam van de Key Vault dns zone')
-param keyVaultPrivateDnsZoneName string
+
+@description('id van app service')
+param appServiceId string
+
+@description('id van app service')
+param appFunctionId string
+
 // Definieer standaard access policies (aanpasbaar of parametriseerbaar indien gewenst)
 param accessPolicies array = [
   {
     tenantId: tenantId
-    objectId: 'aps id'
+    objectId: appServiceId
     permissions: {
       certificates: []
       keys: [
@@ -37,7 +39,7 @@ param accessPolicies array = [
   }
   {
     tenantId: tenantId
-    objectId: 'function app id'
+    objectId: appFunctionId
     permissions: {
       certificates: []
       keys: [
@@ -87,27 +89,6 @@ resource keyVault 'Microsoft.KeyVault/vaults@2016-10-01' = {
       family: 'A'
       name: 'standard'
     }
-  }
-}
-
-
-resource keyVaultPrivateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = {
-  name: keyVaultPrivateDnsZoneName
-  location: 'global'
-  tags: tags
-  properties: {}
-}
-
-resource keyVaultPrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
-  name: '${replace(keyVaultPrivateDnsZone.name, '.', '-')}-link'
-  location: 'global'
-  parent: keyVaultPrivateDnsZone
-  tags: tags
-  properties: {
-    virtualNetwork: {
-      id: virtualNetworkId
-    }
-    registrationEnabled: false
   }
 }
 
