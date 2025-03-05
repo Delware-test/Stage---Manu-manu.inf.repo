@@ -1,99 +1,56 @@
-@description('De naam van de Key Vault')
-param keyVaultName string
+@description('name for the web app name')
+param webAppName string
 
-@description('Azure regio waarin de Key Vault wordt aangemaakt')
+@description('The SKU of App Service Plan.')
+param sku string 
+
+@description('The runtime stack of web app')
+param linuxFxVersion string
+
+@description('Location for all resources.')
 param location string
 
-@description('Tags om toe te passen op de Key Vault')
 param tags object
 
-@description('Tenant id voor de Key Vault')
-param tenantId string
+@description('name of App Service Plan.')
+param appServicePlanName string
 
-@description('Required. Resource ID of the subnet for private endpoints.')
+@description('name for the web app name')
 param subnetId string
 
+@description('name for the web app name')
+var webSiteName = toLower('wapp-${webAppName}')
 
-@description('id van app service')
-param appServiceId string
 
-@description('id van app service')
-param appFunctionId string
 
-// Definieer standaard access policies (aanpasbaar of parametriseerbaar indien gewenst)
-param accessPolicies array = [
-  {
-    tenantId: tenantId
-    objectId: appServiceId
-    permissions: {
-      certificates: []
-      keys: [
-        'Get'
-        'List'
-      ]
-      secrets: [
-        'Get'
-        'List'
-      ]
-    }
-  }
-  {
-    tenantId: tenantId
-    objectId: appFunctionId
-    permissions: {
-      certificates: []
-      keys: [
-        'Get'
-        'List'
-      ]
-      secrets: [
-        'Get'
-        'List'
-      ]
-    }
-  }
-  {
-    tenantId: tenantId
-    objectId: 'gebruiker id'
-    permissions: {
-      certificates: []
-      keys: [
-        'Get'
-        'List'
-      ]
-      secrets: [
-        'Get'
-        'List'
-        'set'
-      ]
-    }
-  }
-]
-
-// Key Vault resource
-resource keyVault 'Microsoft.KeyVault/vaults@2016-10-01' = {
-  name: keyVaultName
+resource appServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
+  name: appServicePlanName
   location: location
   tags: tags
   properties: {
-    enabledForDeployment: true
-    enabledForTemplateDeployment: true
-    enabledForDiskEncryption: false
-    enableSoftDelete: true
-    softDeleteRetentionInDays: 90
-    enableRbacAuthorization: false
-    createMode: 'default'
-    tenantId: subscription().tenantId
-    accessPolicies: accessPolicies
-    sku: {
-      family: 'A'
-      name: 'standard'
+    reserved: true
+  }
+  sku: {
+    name: sku
+  }
+  kind: 'linux'
+}
+
+resource appService 'Microsoft.Web/sites@2020-06-01' = {
+  name: webSiteName
+  location: location
+  tags: tags
+  properties: {
+    serverFarmId: appServicePlan.id
+    siteConfig: {
+      linuxFxVersion: linuxFxVersion
     }
   }
 }
 
-resource keyVaultEndpoint 'Microsoft.Network/privateEndpoints@2023-11-01' = {
-  name: '${keyVault.name}-ep'
+
+resource appServiceEndpoint 'Microsoft.Network/privateEndpoints@2023-11-01' = {
+  name: '${appService.name}-ep'
   location: location
   tags: tags
   properties: {
@@ -102,12 +59,17 @@ resource keyVaultEndpoint 'Microsoft.Network/privateEndpoints@2023-11-01' = {
     }
     privateLinkServiceConnections: [
       {
-        name: 'keyVaultLink'
+        name: 'appServiceLink'
         properties: {
-          privateLinkServiceId: keyVault.id
-          groupIds: ['vault']
+          privateLinkServiceId: appService.id
+          groupIds: ['appService']
         }
       }
     ]
   }
 }
+
+
+
+
+output id string = appService.id
