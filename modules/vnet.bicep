@@ -11,16 +11,22 @@ param virtualNetworkName string
 param vnetAddressPrefix string
 
 @description('application-subnet address prefix')
-param applicationsubnetPrefix string = '10.0.0.0/24'
+param applicationsubnetPrefix string
 
 @description('Scoring subnet address prefix')
-param dataSubnetPrefix string = '10.0.1.0/24'
+param dataSubnetPrefix string
+
+@description('Scoring subnet address prefix')
+param managementSubnetPrefix string
 
 @description('Network security group id')
 param networkSecurityGroupId string
 
 @description('Network security group id')
 param networkSecurityGroupId2 string
+
+@description('Network security group id')
+param networkSecurityGroupId3 string
 
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = {
   name: virtualNetworkName
@@ -51,9 +57,19 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = {
           }
         }
       }
+      { 
+        name: 'management'
+        properties: {
+          addressPrefix: managementSubnetPrefix
+          networkSecurityGroup: {
+            id: networkSecurityGroupId3
+          }
+        }
+      }
     ]
   }
 }
 
 output id string = virtualNetwork.id
 output name string = virtualNetwork.name
+
