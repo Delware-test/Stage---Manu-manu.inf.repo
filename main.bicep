@@ -38,6 +38,15 @@ module nsg2 'modules/nsg2.bicep' = {
   }
 }
 
+module nsg3 'modules/nsg2.bicep' = { 
+  name: 'nsgdeploymentmanagementsub'
+  params: {
+    location: location
+    tags: tags 
+    nsgName2: 'delw-nsg-paas-tst-data-we-003'
+  }
+}
+
 
 module vnet 'modules/vnet.bicep' = {
   name: 'vnetDeployment'
@@ -48,8 +57,10 @@ module vnet 'modules/vnet.bicep' = {
     vnetAddressPrefix : '10.0.0.0/16'
     applicationsubnetPrefix : '10.0.0.0/24'
     dataSubnetPrefix : '10.0.1.0/24'
+    managementSubnetPrefix : '10.0.2.0/24'
     networkSecurityGroupId: nsg.outputs.networkSecurityGroup
     networkSecurityGroupId2: nsg2.outputs.networkSecurityGroup
+    networkSecurityGroupId3: nsg3.outputs.networkSecurityGroup
   }
 }
 
@@ -77,11 +88,13 @@ module vm 'modules/virtualmachine.bicep' = {
     securityType: 'TrustedLaunch'
     adminUsername: adminUsername
     adminPassword: adminPassword
-    subnetId: vnet.outputs.id
     publicIPAllocationMethod: 'Dynamic'
     publicIpSku: 'Basic'
     dnsLabelPrefix: 'delw-vm-paas-tst-we-001'
     OSVersion: '2022-datacenter-azure-edition'
+    subnetId : '${vnet.outputs.id}/subnets/management'
+    vmSize: ' Standard_D2s_v3'
+
   }
 }
 
@@ -90,7 +103,27 @@ module sql 'modules/sql.bicep' = {
   params: {
     location: location
     tags: tags
-    subnetId: virtualNetwork.outputs.subnets[1].id
+    serverName: 'delw-sql-paas-tst-we-001'
+    adminUsername: adminUsername
+    adminPassword: adminPassword
+    tier: 'standard'
+    sqlDBName: 'delw-sqldb-paas-tst-we-001'
+     namesqldb: 'test'
+    subnetId: '${vnet.outputs.id}/subnets/data'
+  }
+}
+
+
+module aps 'modules/appserviceplan.bicep' = {
+  name: 'appserviceDeployment'
+  params: {
+    location: location
+    tags: tags
+    webAppName : 'ezfzfe'
+    appServicePlanName: 'delw-aps-paas-tst-we-001'
+    sku: 'B1'
+    linuxFxVersion: 'PYTHON|3.12'
+    //subnetId: '${vnet.outputs.id}/subnets/application'
   }
 }
 
