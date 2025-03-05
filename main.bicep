@@ -65,16 +65,16 @@ module vnet 'modules/vnet.bicep' = {
 }
 
 
-  module keyVault 'modules/keyvault.bicep' = {
+  module keyvault 'modules/keyvault.bicep' = {
     name: 'keyVaultDeployment'
     params: {
       keyVaultName: 'delw-kv-paas-tst-we-001'
       location: location
       tags: tags
       tenantId: subscription().tenantId
-      keyVaultPrivateDnsZoneName: 'privatel'
-      virtualNetworkId: vnet.outputs.id
       subnetId: '${vnet.outputs.id}/subnets/data'
+      appServiceId: aps.outputs.id
+      appFunctionId: funcionapp.outputs.id
     }
   }
 
@@ -119,12 +119,34 @@ module aps 'modules/appserviceplan.bicep' = {
   params: {
     location: location
     tags: tags
-    webAppName : 'ezfzfe'
+    webAppName : 'delw-as-paas-tst-we-001'
     appServicePlanName: 'delw-aps-paas-tst-we-001'
     sku: 'B1'
     linuxFxVersion: 'PYTHON|3.12'
-    //subnetId: '${vnet.outputs.id}/subnets/application'
+    subnetId: '${vnet.outputs.id}/subnets/application'
   }
 }
 
+module paasprivatednszone 'modules/privatednszone.bicep' = {
+  name: 'paasprivatednszoneDeployment'
+  params: {
+    tags: tags
+    privateDnsZoneName: 'PaaSDnsZone'
+    virtualNetworkId: vnet.outputs.id
+    privateDnsZoneLinkName: 'PaaS-link'
+  }
+}
+
+module funcionapp 'modules/functionapp.bicep' = {
+  name: 'functionappDeployment'
+  params: {
+    name:'delw-func-paas-tst-we-001'
+    location:location
+    tags: tags
+    linuxFxVersion: 'Python|3.11'
+    serverFarmId: aps.outputs.id
+    isReserved: 'functionapp,linux'
+    functionSubnetId: '${vnet.outputs.id}/subnets/application'
+  }
+}
 
