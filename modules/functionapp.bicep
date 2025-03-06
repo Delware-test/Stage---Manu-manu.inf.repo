@@ -23,6 +23,9 @@ param serverFarmId string
 @description('The app insights id of the function app.')
 param AppInsightsID string
 
+param keyVaultName string
+
+param secretName string
 
 resource functionApp 'Microsoft.Web/sites@2022-03-01' = {
   name: name
@@ -43,6 +46,10 @@ resource functionApp 'Microsoft.Web/sites@2022-03-01' = {
         {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
           value: reference(AppInsightsID, '2015-05-01').ConnectionString
+        }
+        {
+          name: 'MY_SECRET' // This is the environment variable name
+          value: '@Microsoft.KeyVault(SecretUri=https://${keyVaultName}.vault.azure.net/secrets/${secretName}/)'
         }
       ]
     }
