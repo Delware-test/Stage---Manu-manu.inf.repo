@@ -26,6 +26,19 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2022-01-01' = {
           direction: 'Inbound'
         }
       }
+      {
+        name: 'NSG_voor_managaement'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: '10.0.2.5'
+          destinationAddressPrefix: '10.0.0.0/24'
+          access: 'Allow'
+          priority: 101
+          direction: 'Inbound'
+        }
+      }
     ]
   }
 }
