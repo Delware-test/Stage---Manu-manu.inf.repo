@@ -46,6 +46,14 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = {
           networkSecurityGroup: {
             id: networkSecurityGroupId
           }
+          delegations: [
+            {
+              name: 'delegation-web'
+              properties: {
+                serviceName: 'Microsoft.Web/serverFarms'
+              }
+            }
+          ]
         }
       }
       { 
@@ -71,5 +79,4 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2022-01-01' = {
 }
 
 output id string = virtualNetwork.id
-output name string = virtualNetwork.name
 
