@@ -17,6 +17,9 @@ param adminUsername string
 @description('Jumphost virtual machine password')
 param adminPassword string
 
+@secure()
+param secret string
+
 module nsg 'modules/nsg.bicep' = { 
   name: 'nsgdeploymentapplicationsub'
   params: {
@@ -122,6 +125,8 @@ module aps 'modules/appserviceplan.bicep' = {
     sku: 'B1'
     linuxFxVersion: 'PYTHON|3.12'
     AppInsightsID: applicationinsights.outputs.applicationInsightsId
+    keyVaultName:  'delw-kv-paas-tst-we-004'
+    secretName: 'mysecret'
   }
 }
 
@@ -136,6 +141,8 @@ module funcionapp 'modules/functionapp.bicep' = {
     isReserved: 'functionapp,linux'
     functionSubnetId: '${vnet.outputs.id}/subnets/application'
     AppInsightsID: applicationinsights.outputs.applicationInsightsId
+    keyVaultName:  'delw-kv-paas-tst-we-004'
+    secretName: 'mysecret'
   }
 }
 
@@ -149,6 +156,10 @@ module funcionapp 'modules/functionapp.bicep' = {
       subnetId: '${vnet.outputs.id}/subnets/data'
       appServiceId: aps.outputs.id
       appFunctionId: funcionapp.outputs.id
+      secretName: 'mysecret'
+      secretValue: secret
   }
 }
+
+
 
