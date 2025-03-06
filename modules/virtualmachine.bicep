@@ -207,4 +207,3 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
 }
 
 output hostname string = publicIp.properties.dnsSettings.fqdn
-
