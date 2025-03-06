@@ -19,6 +19,14 @@ param appServiceId string
 @description('id van app service')
 param appFunctionId string
 
+
+@description('Naam van het geheim in Key Vault')
+param secretName string
+
+@secure()
+@description('Waarde van het geheim')
+param secretValue string
+
 // Definieer standaard access policies (aanpasbaar of parametriseerbaar indien gewenst)
 param accessPolicies array = [
   {
@@ -73,6 +81,15 @@ resource keyVault 'Microsoft.KeyVault/vaults@2016-10-01' = {
   }
 }
 
+// 🔹 Add Secret to Key Vault
+resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2018-02-14' = {
+  name: secretName  // Secret name inside Key Vault
+  parent: keyVault
+  properties: {
+    value: secretValue  // Secret Value (Do not store sensitive values in plain text)
+  }
+}
+
 resource keyVaultEndpoint 'Microsoft.Network/privateEndpoints@2023-11-01' = {
   name: '${keyVault.name}-ep'
   location: location
@@ -92,4 +109,3 @@ resource keyVaultEndpoint 'Microsoft.Network/privateEndpoints@2023-11-01' = {
     ]
   }
 }
-
