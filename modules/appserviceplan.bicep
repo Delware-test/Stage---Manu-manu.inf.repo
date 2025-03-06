@@ -1,39 +1,69 @@
-// Creates an Application Insights instance as dependency for Azure ML
-@description('Azure region of the deployment')
+@description('name for the web app name')
+param webAppName string
+
+@description('The SKU of App Service Plan.')
+param sku string 
+
+@description('The runtime stack of web app')
+param linuxFxVersion string
+
+@description('Location for all resources.')
 param location string
 
 @description('Tags to add to the resources')
 param tags object
 
-@description('Application Insights resource name')
-param name string
+@description('name of App Service Plan.')
+param appServicePlanName string
 
-@description('Log Analytics resource name')
-param logAnalyticsWorkspaceName string 
 
-resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
-  name: logAnalyticsWorkspaceName
-  location: location
-  properties: {
-    sku: {
-      name: 'PerGB2018'
-    }
-    retentionInDays: 30
-    publicNetworkAccessForIngestion: 'Enabled'
-    publicNetworkAccessForQuery: 'Disabled'
-  }
-}
+@description('name for the web app name')
+var webSiteName = toLower('wapp-${webAppName}')
 
-resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: name
+
+param AppInsightsID string
+
+
+resource appServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
+  name: appServicePlanName
   location: location
   tags: tags
-  kind: 'web'
   properties: {
-    Application_Type: 'web'
-    WorkspaceResourceId: logAnalyticsWorkspace.id
-    Flow_Type: 'Bluefield'
+    reserved: true
   }
+  sku: {
+    name: sku
+  }
+  kind: 'linux'
 }
 
-output applicationInsightsId string = applicationInsights.id
+resource appService 'Microsoft.Web/sites@2020-06-01' = {
+  name: webSiteName
+  location: location
+  tags: tags
+  identity: {
+    type: 'SystemAssigned'  // This enables the system-assigned managed identity
+  }
+  properties: {
+    serverFarmId: appServicePlan.id
+    siteConfig: {
+      linuxFxVersion: linuxFxVersion
+      appSettings: [
+        {
+          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
+          value: reference(AppInsightsID, '2015-05-01').InstrumentationKey
+        }
+        {
+          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+          value: reference(AppInsightsID, '2015-05-01').ConnectionString
+        }
+      ]
+    }
+    
+  }
+  
+}
+
+output id string = appService.identity.principalId
+output apsid string = appServicePlan.id
+
