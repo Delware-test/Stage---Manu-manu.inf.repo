@@ -17,7 +17,7 @@ variables:
   vmImageName: 'ubuntu-latest'
   resourceGroupName: 'RG_Manu.Coppens'
   location: 'West Europe'
-  templateFile: './main.bicep'
+  templateFile: 'main.bicep'
 ##  csmParametersFile: './main.bicepparam'
 
 pool:
