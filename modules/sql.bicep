@@ -67,6 +67,3 @@ resource SqlServerEndpoint 'Microsoft.Network/privateEndpoints@2023-11-01' = {
     ]
   }
 }
-
-
-
