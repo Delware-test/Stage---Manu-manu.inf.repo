@@ -1,0 +1,39 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+name: Deploy Bicep files
+
+parameters:
+- name: azureServiceConnection
+  type: string
+  default: 'coppensm@delawareconsulting.com'
+
+variables:
+  vmImageName: 'ubuntu-latest'
+  resourceGroupName: 'RG_Manu.Coppens'
+  location: 'West Europe'
+  templateFile: './main.bicep'
+##  csmParametersFile: './main.bicepparam'
+
+pool:
+  vmImage: $(vmImageName)
+
+steps:
+- task: AzureResourceManagerTemplateDeployment@3
+  inputs:
+    deploymentScope: 'Resource Group'
+    azureSubscription: 'DCS-EM-AZ3'
+    action: 'Create Or Update Resource Group'
+    resourceGroupName: '$(resourceGroupName)'
+    location: '$(location)'
+    templateLocation: 'Linked artifact'
+    csmFile: '$(templateFile)'
+##    csmParametersFile: '$(csmParametersFile)'
+    overrideParameters: '-storageAccountType Standard_LRS'
+    deploymentMode: 'Incremental'
+    deploymentName: 'DeployPipelineTemplate'
