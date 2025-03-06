@@ -13,7 +13,6 @@ param tenantId string
 @description('Required. Resource ID of the subnet for private endpoints.')
 param subnetId string
 
-
 @description('id van app service')
 param appServiceId string
 
@@ -52,22 +51,6 @@ param accessPolicies array = [
       ]
     }
   }
-  {
-    tenantId: tenantId
-    objectId: 'gebruiker id'
-    permissions: {
-      certificates: []
-      keys: [
-        'Get'
-        'List'
-      ]
-      secrets: [
-        'Get'
-        'List'
-        'set'
-      ]
-    }
-  }
 ]
 
 // Key Vault resource
@@ -80,8 +63,6 @@ resource keyVault 'Microsoft.KeyVault/vaults@2016-10-01' = {
     enabledForTemplateDeployment: true
     enabledForDiskEncryption: false
     enableSoftDelete: true
-    softDeleteRetentionInDays: 90
-    enableRbacAuthorization: false
     createMode: 'default'
     tenantId: subscription().tenantId
     accessPolicies: accessPolicies
@@ -111,3 +92,4 @@ resource keyVaultEndpoint 'Microsoft.Network/privateEndpoints@2023-11-01' = {
     ]
   }
 }
+
