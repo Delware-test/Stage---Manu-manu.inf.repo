@@ -17,11 +17,14 @@ param adminPassword string
 @description('tags')
 param tags object
 
+@description('The name of the SQL SKU.')
 param namesqldb string
 
+@description('The tier of the SQL SKU.')
 @secure()
 param tier string
 
+@description('The subnet id of the SQL logical server.')
 param subnetId string
 
 resource sqlServer 'Microsoft.Sql/servers@2022-05-01-preview' = {
@@ -64,3 +67,6 @@ resource SqlServerEndpoint 'Microsoft.Network/privateEndpoints@2023-11-01' = {
     ]
   }
 }
+
+
+
