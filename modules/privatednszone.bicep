@@ -4,8 +4,10 @@ param privateDnsZoneName string
 @description('Tags om toe te passen op de Key Vault')
 param tags object
 
+@description('id van virtual network')
 param virtualNetworkId string
 
+@description('De naam van de Key Vault dns zone link')
 param privateDnsZoneLinkName string
 
 resource privateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = {
@@ -28,3 +30,4 @@ resource PrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLin
     registrationEnabled: false
   }
 }
+
