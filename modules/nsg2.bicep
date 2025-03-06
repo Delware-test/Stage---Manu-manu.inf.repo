@@ -33,9 +33,22 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2022-01-01' = {
           sourcePortRange: '*'
           destinationPortRange: '*'
           sourceAddressPrefix: '10.0.0.0/24'
-          destinationAddressPrefix: '10.0.1.4'
+          destinationAddressPrefix: '10.0.1.5'
           access: 'Allow'
           priority: 100
+          direction: 'Inbound'
+        }
+      }
+      {
+        name: 'AllowvmTodatasub'
+        properties: {
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: '10.0.2.5'
+          destinationAddressPrefix: '*'
+          access: 'Allow'
+          priority: 101
           direction: 'Inbound'
         }
       }
