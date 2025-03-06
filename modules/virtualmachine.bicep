@@ -8,6 +8,7 @@ param adminPassword string
 @description('Unique DNS Name for the Public IP used to access the Virtual Machine.')
 param dnsLabelPrefix string = toLower('${vmName}-${uniqueString(resourceGroup().id, vmName)}')
 
+
 @description('Name for the Public IP used to access the Virtual Machine.')
 param publicIpName string = toLower('${vmName}-publicip')
 
@@ -25,6 +26,7 @@ param publicIPAllocationMethod string
 ])
 param publicIpSku string
 
+@description('Subnet ID for the Virtual Machine.')
 param subnetId string
 
 
@@ -205,3 +207,4 @@ resource vm 'Microsoft.Compute/virtualMachines@2022-03-01' = {
 }
 
 output hostname string = publicIp.properties.dnsSettings.fqdn
+
