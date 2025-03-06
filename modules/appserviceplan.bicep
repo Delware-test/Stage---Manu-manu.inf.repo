@@ -16,9 +16,14 @@ param tags object
 @description('name of App Service Plan.')
 param appServicePlanName string
 
+param keyVaultName string
+
+param secretName string
+
 
 @description('name for the web app name')
 var webSiteName = toLower('wapp-${webAppName}')
+
 
 
 param AppInsightsID string
@@ -57,6 +62,10 @@ resource appService 'Microsoft.Web/sites@2020-06-01' = {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
           value: reference(AppInsightsID, '2015-05-01').ConnectionString
         }
+        {
+          name: 'MY_SECRET' // This is the environment variable name
+          value: '@Microsoft.KeyVault(SecretUri=https://${keyVaultName}.vault.azure.net/secrets/${secretName}/)'
+        }
       ]
     }
     
@@ -66,4 +75,3 @@ resource appService 'Microsoft.Web/sites@2020-06-01' = {
 
 output id string = appService.identity.principalId
 output apsid string = appServicePlan.id
-
