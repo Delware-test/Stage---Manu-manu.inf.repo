@@ -1,75 +1,39 @@
-@description('name for the web app name')
-param webAppName string
-
-@description('The SKU of App Service Plan.')
-param sku string 
-
-@description('The runtime stack of web app')
-param linuxFxVersion string
-
-@description('Location for all resources.')
+// Creates an Application Insights instance as dependency for Azure ML
+@description('Azure region of the deployment')
 param location string
 
+@description('Tags to add to the resources')
 param tags object
 
-@description('name of App Service Plan.')
-param appServicePlanName string
+@description('Application Insights resource name')
+param name string
 
-@description('name for the web app name')
-param subnetId string
+@description('Log Analytics resource name')
+param logAnalyticsWorkspaceName string 
 
-@description('name for the web app name')
-var webSiteName = toLower('wapp-${webAppName}')
-
-
-
-resource appServicePlan 'Microsoft.Web/serverfarms@2020-06-01' = {
-  name: appServicePlanName
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-06-01' = {
+  name: logAnalyticsWorkspaceName
   location: location
-  tags: tags
   properties: {
-    reserved: true
-  }
-  sku: {
-    name: sku
-  }
-  kind: 'linux'
-}
-
-resource appService 'Microsoft.Web/sites@2020-06-01' = {
-  name: webSiteName
-  location: location
-  tags: tags
-  properties: {
-    serverFarmId: appServicePlan.id
-    siteConfig: {
-      linuxFxVersion: linuxFxVersion
+    sku: {
+      name: 'PerGB2018'
     }
+    retentionInDays: 30
+    publicNetworkAccessForIngestion: 'Enabled'
+    publicNetworkAccessForQuery: 'Disabled'
   }
 }
 
-
-resource appServiceEndpoint 'Microsoft.Network/privateEndpoints@2023-11-01' = {
-  name: '${appService.name}-ep'
+resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: name
   location: location
   tags: tags
+  kind: 'web'
   properties: {
-    subnet: {
-      id: subnetId
-    }
-    privateLinkServiceConnections: [
-      {
-        name: 'appServiceLink'
-        properties: {
-          privateLinkServiceId: appService.id
-          groupIds: ['appService']
-        }
-      }
-    ]
+    Application_Type: 'web'
+    WorkspaceResourceId: logAnalyticsWorkspace.id
+    Flow_Type: 'Bluefield'
   }
 }
 
-
-
-
-output id string = appService.id
+output applicationInsightsId string = applicationInsights.id
