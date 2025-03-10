@@ -1,39 +1,72 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- main
+  - main  # Alleen triggeren op de main branch
 
-name: Deploy Bicep files
+name: Deploy Bicep Infrastructure
 
 parameters:
-- name: azureServiceConnection
-  type: string
-  default: '?'
+  - name: azureServiceConnection
+    type: string
+    default: 'DCS-EM-AZ3'  # Azure service connection naam
 
 variables:
   vmImageName: 'ubuntu-latest'
   resourceGroupName: 'RG_Manu.Coppens'
   location: 'West Europe'
   templateFile: 'main.bicep'
-##  csmParametersFile: './main.bicepparam'
+  parameterFile: 'main.bicepparam'  # Voeg een parameterbestand toe als nodig
 
 pool:
   vmImage: $(vmImageName)
 
-steps:
-- task: AzureResourceManagerTemplateDeployment@3
-  inputs:
-    deploymentScope: 'Resource Group'
-    azureSubscription: 'DCS-EM-AZ3'
-    action: 'Create Or Update Resource Group'
-    resourceGroupName: '$(resourceGroupName)'
-    location: '$(location)'
-    templateLocation: 'Linked artifact'
-    csmFile: '$(templateFile)'
-##    csmParametersFile: '$(csmParametersFile)'
-    overrideParameters: '-storageAccountType Standard_LRS'
-    deploymentMode: 'Incremental'
-    deploymentName: 'DeployPipelineTemplate'
+stages:
+  - stage: DeployInfrastructure
+    displayName: 'Deploy Bicep Infrastructure'
+    jobs:
+      - job: Deploy
+        displayName: 'Deploy to Azure'
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Azure Login'
+            inputs:
+              azureSubscription: ${{ parameters.azureServiceConnection }}
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az account show
+
+          - task: AzureCLI@2
+            displayName: 'Validate Bicep Deployment'
+            inputs:
+              azureSubscription: ${{ parameters.azureServiceConnection }}
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az deployment group validate \
+                  --resource-group $(resourceGroupName) \
+                  --template-file $(templateFile) \
+                  --parameters @$(parameterFile)
+
+          - task: AzureResourceManagerTemplateDeployment@3
+            displayName: 'Deploy Bicep Files'
+            inputs:
+              deploymentScope: 'Resource Group'
+              azureSubscription: ${{ parameters.azureServiceConnection }}
+              action: 'Create Or Update Resource Group'
+              resourceGroupName: '$(resourceGroupName)'
+              location: '$(location)'
+              templateLocation: 'Linked artifact'
+              csmFile: '$(templateFile)'
+              csmParametersFile: '$(parameterFile)'  # Alleen als parameters nodig zijn
+              overrideParameters: '-adminUsername yourAdmin -adminPassword $(ADMIN_PASSWORD)' # Omgevingsvariabelen gebruiken voor wachtwoorden
+              deploymentMode: 'Incremental'
+              deploymentName: 'DeployPipelineTemplate'
+
+          - task: AzureCLI@2
+            displayName: 'Check Deployment Status'
+            inputs:
+              azureSubscription: ${{ parameters.azureServiceConnection }}
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az deployment group show --resource-group $(resourceGroupName) --name DeployPipelineTemplate --query properties.provisioningState
+
