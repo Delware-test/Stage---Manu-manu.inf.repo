@@ -16,10 +16,10 @@ jobs:
         inputs:
           deploymentScope: 'Resource Group'
           azureResourceManagerConnection: 'My-Service-Connection'
-          subscriptionId: '$(subscriptionId)'
+          subscriptionId: 'cc934d76-6d72-49cb-a908-81217ad4ae29'
           action: 'Create Or Update Resource Group'
-          resourceGroupName: '$(RG)'
-          location: '$(location)'
+          resourceGroupName: 'RG_Manu.Coppens'
+          location: 'West Europe'
           templateLocation: 'Linked artifact'
           csmFile: 'main.bicep'
           deploymentMode: 'Validation'
