@@ -4,8 +4,8 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  RG: 'RG_Manu_Coppens'  # Correctie van naamgeving
-  subscriptionId: 'cc934d76-6d72-49cb-a908-81217ad4ae29'  # Vervang door je echte Subscription ID
+  RG: 'RG_Manu_Coppens'
+  subscriptionId: 'cc934d76-6d72-49cb-a908-81217ad4ae29'
   location: 'West Europe'
 
 jobs:
@@ -15,7 +15,7 @@ jobs:
         displayName: 'Deploy Bicep files'
         inputs:
           deploymentScope: 'Resource Group'
-          azureResourceManagerConnection: 'VBt8Q~mZDDbSXGxTcOe3t6_d2-UDX8vCCkD3TbRY'  # Vervang door jouw service connection
+          azureResourceManagerConnection: 'bruhh'
           subscriptionId: '$(subscriptionId)'
           action: 'Create Or Update Resource Group'
           resourceGroupName: '$(RG)'
