@@ -15,7 +15,7 @@ jobs:
         displayName: 'Deploy Bicep files'
         inputs:
           deploymentScope: 'Resource Group'
-          azureResourceManagerConnection: 'bruhh'
+          azureResourceManagerConnection: 'My-Service-Connection'
           subscriptionId: '$(subscriptionId)'
           action: 'Create Or Update Resource Group'
           resourceGroupName: '$(RG)'
