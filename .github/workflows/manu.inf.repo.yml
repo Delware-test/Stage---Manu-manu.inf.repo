@@ -1,0 +1,21 @@
+name: Stage_-_Manu/manu.inf.repo
+on:
+  workflow_dispatch:
+env:
+  RG: UPDATE ME
+  location: West Europe
+  subscriptionId: cc934d76-6d72-49cb-a908-81217ad4ae29
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4.1.0
+    - name: Deploy Bicep files
+      uses: azure/login@v1.6.0
+      with:
+        creds: "${{ secrets.AZURE_CREDENTIALS }}"
+    - name: Deploy Bicep files
+      run: |-
+        az group create --location "West Europe" --name "RG_Manu.Coppens" --subscription "cc934d76-6d72-49cb-a908-81217ad4ae29"
+        az deployment group create --resource-group "RG_Manu.Coppens" --no-prompt true --subscription "cc934d76-6d72-49cb-a908-81217ad4ae29" --mode "Validation" --template-file "main.bicep"
