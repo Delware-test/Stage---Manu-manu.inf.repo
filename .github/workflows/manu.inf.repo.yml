@@ -14,8 +14,7 @@ jobs:
     - name: Deploy Bicep files
       uses: azure/login@v1.6.0
       with:
-        creds: "${{ secrets.AZURE_CREDENTIALS }}"
+        creds: "${{ secrets.MY_SERVICE_CONNECTION }}"
     - name: Deploy Bicep files
       run: |-
-        az group create --location "West Europe" --name "RG_Manu.Coppens" --subscription "cc934d76-6d72-49cb-a908-81217ad4ae29"
-        az deployment group create --resource-group "RG_Manu.Coppens" --no-prompt true --subscription "cc934d76-6d72-49cb-a908-81217ad4ae29" --mode "Validation" --template-file "main.bicep"
+        az deployment group validate --resource-group "RG_Manu.Coppens" --subscription "cc934d76-6d72-49cb-a908-81217ad4ae29" --template-file "main.bicep"
