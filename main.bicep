@@ -9,16 +9,6 @@ param tags object = {
   'IaaS|PaaS': 'PaaS'
 }
 
-@description('Jumphost virtual machine username')
-param adminUsername string
-
-@secure()
-@minLength(8)
-@description('Jumphost virtual machine password')
-param adminPassword string
-
-@secure()
-param secret string
 
 module nsg 'modules/nsg.bicep' = { 
   name: 'nsgdeploymentapplicationsub'
@@ -73,37 +63,7 @@ module paasprivatednszone 'modules/privatednszone.bicep' = {
   }
 }
 
-module vm 'modules/virtualmachine.bicep' = {
-  name: 'vmDeployment'
-  params: {
-    location: location
-    tags: tags
-    vmName: 'delwvmpaaststwe'
-    securityType: 'TrustedLaunch'
-    adminUsername: adminUsername
-    adminPassword: adminPassword
-    publicIPAllocationMethod: 'Dynamic'
-    publicIpSku: 'Basic'
-    OSVersion: '2022-datacenter-azure-edition'
-    subnetId : '${vnet.outputs.id}/subnets/management'
-    vmSize: 'Standard_D2d_v5'
-  }
-}
 
-module sql 'modules/sql.bicep' = {
-  name: 'sqlDeployment'
-  params: {
-    location: location
-    tags: tags
-    serverName: 'delw-sql-paas-tst-we-004'
-    adminUsername: adminUsername
-    adminPassword: adminPassword
-    tier: 'standard'
-    sqlDBName: 'delw-sqldb-paas-tst-we-004'
-     namesqldb: 'S2'
-    subnetId: '${vnet.outputs.id}/subnets/data'
-  }
-}
 
 module applicationinsights 'modules/applicationinsights.bicep' = {
   name: 'applicationinsightsDeployment'
@@ -143,21 +103,6 @@ module funcionapp 'modules/functionapp.bicep' = {
     AppInsightsID: applicationinsights.outputs.applicationInsightsId
     keyVaultName:  'delw-kv-paas-tst-we-004'
     secretName: 'mysecret'
-  }
-}
-
-  module keyvault 'modules/keyvault.bicep' = {
-    name: 'keyVaultDeployment'
-    params: {
-      keyVaultName: 'delw-kv-paas-tst-we-004'
-      location: location
-      tags: tags
-      tenantId: subscription().tenantId
-      subnetId: '${vnet.outputs.id}/subnets/data'
-      appServiceId: aps.outputs.id
-      appFunctionId: funcionapp.outputs.id
-      secretName: 'mysecret'
-      secretValue: secret
   }
 }
 
